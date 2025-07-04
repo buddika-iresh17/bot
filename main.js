@@ -16,7 +16,7 @@ const fetch = require('node-fetch');
 const cheerio = require("cheerio");
 const { igdl } = require("ruhend-scraper");
 //╭────────────●●►
-const FormData = require("form-data");
+const FormData = require('form-data');
 //╰────────────●●►
 //===========
 const ffmpeg = require('fluent-ffmpeg');
@@ -1637,7 +1637,7 @@ let desc = `╔══╣❍ᴀʟʟ ᴍᴇɴᴜ❍╠═══⫸
 
 > _*ᴄʀᴇᴀᴛᴇᴅ ʙʏ ᴍᴀɴɪꜱʜᴀ ᴄᴏᴅᴇʀ*_`
 
-await conn.sendMessage(from,{image: {url: `https://files.catbox.moe/vbi10j.png`},caption: desc},{quoted: mek});
+await conn.sendMessage(from,{image: {url: config.ALIVE_IMG},caption: desc},{quoted: mek});
 
  } catch (e) {
       console.log(e);
@@ -1662,7 +1662,7 @@ let status = `╔══╣❍ꜱʏꜱᴛᴇᴍ❍╠═══⫸
 ╠➢ *ʜᴏꜱᴛɴᴀᴍᴇ :* ${os.hostname()}
 ╚════════════════⫸
 > _*ᴄʀᴇᴀᴛᴇᴅ ʙʏ ᴍᴀɴɪꜱʜᴀ ᴄᴏᴅᴇʀ*_`
-await conn.sendMessage(from,{image:{url:config.ALIVE_IMG},caption:`${status}`},{quoted:mek})
+await conn.sendMessage(from,{image:{url: config.ALIVE_IMG},caption:`${status}`},{quoted:mek})
 
 }catch(e){
 console.log(e)
@@ -2526,47 +2526,101 @@ cmd(
   }
 );
 
+
 cmd(
   {
     pattern: "img2url",
-    alias: ["uploadimg", "imgupload"],
-    desc: "Upload replied image to catbox.moe and get URL",
+    alias: ["telegraph", "i2u"],
+    desc: "Upload image to Telegra.ph and get a permanent URL",
+    category: "convert",
+    filename: __filename,
+  },
+  async (conn, mek, m, { quoted, reply }) => {
+    try {
+      if (!quoted || !quoted.imageMessage) {
+        return reply("❌ Please reply to an image to upload.");
+      }
+
+      // 📥 Download the image as a buffer
+      const media = await downloadMediaMessage(quoted, "buffer", {}, {});
+      if (!media) return reply("❌ Failed to download the image.");
+
+      // 📂 Save to a temporary file
+      const tempPath = path.join(__dirname, `temp_${Date.now()}.jpg`);
+      fs.writeFileSync(tempPath, media);
+
+      // 🌐 Upload to Telegra.ph
+      const form = new FormData();
+      form.append("file", fs.createReadStream(tempPath));
+
+      const res = await axios.post("https://telegra.ph/upload", form, {
+        headers: form.getHeaders(),
+      });
+
+      fs.unlinkSync(tempPath); // 🧹 Clean up the temp file
+
+      if (res.data && res.data[0] && res.data[0].src) {
+        const url = "https://telegra.ph" + res.data[0].src;
+        reply(`✅ Here is your image URL:\n${url}`);
+      } else {
+        reply("❌ Failed to upload to Telegra.ph.");
+      }
+
+    } catch (e) {
+      console.error(e);
+      reply(`❌ Error: ${e.message}`);
+    }
+  }
+);
+
+cmd(
+  {
+    pattern: "postimg",
+    alias: ["postimage", "imgpost"],
+    desc: "Upload replied image to postimages.org and get URL",
     category: "convert",
     filename: __filename,
   },
   async (conn, mek, m, { from, quoted, reply }) => {
     try {
       if (!quoted || !quoted.imageMessage) {
-        return reply("Please reply to an image to upload.");
+        return reply("📎 Please *reply to an image* to upload.");
       }
 
-      // Download the image buffer from the quoted message
-      const imageBuffer = await downloadMediaMessage(quoted, "buffer");
-      if (!imageBuffer) return reply("Failed to download image.");
+      // Download image from message
+      const imageBuffer = await downloadMediaMessage(quoted, "buffer", {}, { logger: conn.logger, reuploadRequest: conn.updateMediaMessage });
+      if (!imageBuffer) return reply("❌ Failed to download image.");
 
-      // Prepare form data for catbox.moe upload
+      // Prepare form data for PostImages
       const form = new FormData();
-      form.append("reqtype", "fileupload");
-      form.append("fileToUpload", imageBuffer, {
+      form.append("upload_session", "");
+      form.append("numfiles", "1");
+      form.append("gallery", "");
+      form.append("uid", "0");
+      form.append("token", "91f9a9f7f88efb4"); // static token; still works for anonymous
+      form.append("upload[]", imageBuffer, {
         filename: "image.png",
         contentType: "image/png",
       });
 
-      // Upload to catbox.moe
-      const response = await axios.post("https://catbox.moe/user/api.php", form, {
-        headers: form.getHeaders(),
-        maxContentLength: Infinity,
-        maxBodyLength: Infinity,
+      // Send upload request
+      const res = await axios.post("https://postimages.org/json/rr", form, {
+        headers: {
+          ...form.getHeaders(),
+          "Origin": "https://postimages.org",
+          "Referer": "https://postimages.org/",
+        },
       });
 
-      if (response.status === 200 && response.data) {
-        return reply(`Image uploaded successfully!\n\nURL:\n${response.data}`);
+      if (res.data && res.data.url) {
+        return reply(`✅ Image uploaded successfully!\n\n📤 URL:\n${res.data.url}`);
       } else {
-        return reply("Failed to upload image.");
+        return reply("❌ Failed to upload image to postimages.org.");
       }
-    } catch (e) {
-      console.error(e);
-      reply("Error uploading image: " + (e.message || e));
+
+    } catch (err) {
+      console.error("PostImages Upload Error:", err);
+      reply("🚫 Error uploading image: " + (err.response?.data?.error || err.message));
     }
   }
 );
