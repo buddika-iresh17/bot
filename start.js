@@ -115,14 +115,19 @@ conn.ev.on('connection.update', async (update) => {
     try {
       const loadPlugins = require(path.join(__dirname, 'main.js'));
       loadPlugins(conn);
-      console.log("✅ Plugins loaded successfully.");
+      console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Plugins loaded successfully ✅...");
     } catch (err) {
-      console.error("❌ Error loading main.js:", err);
+      console.error("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Error loading main.js:", err);
     }
-
-    console.log("🌐 MANISHA-MD: Bot connected to internet...");
-    console.log("🔌 Downloading files and initializing...");
-
+console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 bot internet connected 🌐...");  
+console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 plugins .js file Connect 🔗...");  
+console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Fetching MANISHA-MD data 📚...");  
+console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Plugins installed successful 🔌...");  
+console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Downloading and extracting files 📁...");  
+console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Downloading Files 📥...");  
+console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Connected Successfully ✅...");  
+console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Executing ✅...");  
+console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 creatad by manisha coder 👨‍💻...");  
     const up = `╔═══╣❍ᴍᴀɴɪꜱʜᴀ-ᴍᴅ❍╠═══⫸
 ║ ✅ Bot Connected Successfully!
 ╠════════════➢
@@ -143,7 +148,7 @@ conn.ev.on('connection.update', async (update) => {
     try {
       await conn.sendMessage(ownerNumber + "@s.whatsapp.net", {
         image: {
-          url: "https://imgur.com/a/oa6dzbF", // ✅ Replace with working image
+          url: "https://raw.githubusercontent.com/buddika-iresh17/Exsample/refs/heads/main/Photo/20250527_030737.png", // ✅ Replace with working image
         },
         caption: up,
       });
