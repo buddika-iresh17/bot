@@ -2841,6 +2841,7 @@ cmd({
   filename: __filename
 },
 async (conn, mek, m, { from, quoted, pushname }) => {
+
   const text = `👋 Hello *${pushname}*! 
 
 📖 Here is your main menu:
@@ -2851,20 +2852,24 @@ async (conn, mek, m, { from, quoted, pushname }) => {
 📌 *Bot Info* 👉 Info  
 📌 *Check Weather* 👉 Weather Colombo`
 
-  const footer = "🤖BOT MENU"
-
-  const image = { url: config.ALIVE_IMG} // Change to any image URL you want
-  const thumb = null // Optional thumbnail (use buffer or leave null)
+  const footer = "🤖 BOT MENU"
 
   const buttons = [
-    { quickReplyButton: { displayText: "🆘 Help", id: "help" } },
-    { quickReplyButton: { displayText: "⚙️ Settings", id: "settings" } },
-    { quickReplyButton: { displayText: "📨 Support", id: "support" } },
-    { quickReplyButton: { displayText: "ℹ️ Info", id: "info" } },
-    { quickReplyButton: { displayText: "☀️ Weather", id: "weather colombo" } }
+    { buttonId: "help", buttonText: { displayText: "🆘 Help" }, type: 1 },
+    { buttonId: "settings", buttonText: { displayText: "⚙️ Settings" }, type: 1 },
+    { buttonId: "support", buttonText: { displayText: "📨 Support" }, type: 1 },
+    { buttonId: "info", buttonText: { displayText: "ℹ️ Info" }, type: 1 },
+    { buttonId: "weather colombo", buttonText: { displayText: "☀️ Weather" }, type: 1 }
   ]
 
-  await conn.send5ButImg(from, text, footer, image, buttons, thumb, { quoted: m })
+  await conn.sendMessage(from, {
+    image: { url: config.ALIVE_IMG },
+    caption: text,
+    footer: footer,
+    buttons: buttons,
+    headerType: 4
+  }, { quoted: mek })
+
 })
 //============= module.exports simble===================
 };
