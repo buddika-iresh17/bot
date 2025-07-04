@@ -2834,7 +2834,7 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 });
 
 cmd({
-    pattern: "settings",
+    pattern: "settings2",
     react: "⚙️",
     desc: "Shows bot settings list.",
     category: "settings",
