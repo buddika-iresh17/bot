@@ -345,64 +345,6 @@ cmd({
 
 
 
-const apilink = 'https://www.dark-yasiya-api.site'; // DO NOT CHANGE
-
-cmd({
-    pattern: "xvideos",
-    alias: ["xvdl", "xvdown"],
-    react: "🔞",
-    desc: "Download xvideos.com porn video",
-    category: "download",
-    use: '.xvideos <search text>',
-    filename: __filename
-},
-async (conn, mek, m, { from, quoted, reply, q }) => {
-    try {
-        if (!q) return reply("🔍 Please provide a search term!");
-
-        // Search for videos
-        const xv_list = await fetchJson(`${apilink}/search/xvideo?q=${encodeURIComponent(q)}`);
-        if (!xv_list?.result || xv_list.result.length === 0) {
-            return reply("❌ No results found!");
-        }
-
-        const video_url = xv_list.result[0].url;
-        if (!video_url) return reply("❗ Failed to retrieve video URL.");
-
-        // Get video details
-        const xv_info = await fetchJson(`${apilink}/download/xvideo?url=${video_url}`);
-        if (!xv_info?.result?.dl_link) return reply("❌ Failed to get download link.");
-
-        const msg = `╔══╣❍xᴠɪᴅᴇᴏꜱ❍╠═══⫸\n╠➢ *ᴛɪᴛʟᴇ* : ${xv_info.result.title}\n╠➢ *ᴠɪᴇᴡꜱ* : ${xv_info.result.views}\n╠➢ *ʟɪᴋᴇꜱ* : ${xv_info.result.like}\n╠➢ *ᴅɪꜱʟɪᴋᴇ* : ${xv_info.result.deslike}\n╚═════════════⫸\n\n> _*ᴄʀᴇᴀᴛᴇᴅ ʙʏ ᴍᴀɴɪꜱʜᴀ ᴄᴏᴅᴇʀ*_`;
-
-        // Send video info with thumbnail
-        await conn.sendMessage(from, {
-            text: msg,
-            contextInfo: {
-                externalAdReply: {
-                    title: "XVIDEOS DOWNLOADER",
-                    body: "XVIDEOS DOWNLOADER",
-                    thumbnailUrl: xv_info.result.image,
-                    sourceUrl: video_url,
-                    mediaType: 1,
-                    renderLargerThumbnail: true
-                }
-            }
-        }, { quoted: mek });
-
-        // Send actual video as document
-        const fileName = xv_info.result.title.endsWith('.mp4') ? xv_info.result.title : xv_info.result.title + '.mp4';
-        await conn.sendMessage(from, {
-            document: { url: xv_info.result.dl_link },
-            mimetype: 'video/mp4',
-            fileName: fileName
-        }, { quoted: mek });
-
-    } catch (error) {
-        console.error("🚨 Error in xvideos command:", error);
-        await reply("❌ Unable to download.\n\n🧾 Error: " + error.message);
-    }
-});
 
 
 cmd({
@@ -1360,7 +1302,6 @@ cmd({
                         await conn.sendMessage(senderID, {
                             text: `╭━━━〔 📥 *Download Menu*  📥〕━━━┈⊷
 ┃★╭──────────────
-┃★│ • xvideos [name]
 ┃★│ • song [name]
 ┃★│ • video [name]
 ┃★│ • mp4 [name]
@@ -1429,8 +1370,7 @@ cmd({
                         await conn.sendMessage(senderID, {
                             text: `╭━━━〔 🔄 *Convert Menu* 🔄 〕━━━┈⊷
 ┃★╭──────────────
-┃★│ • img2url
-┃★│ • sticker [img]
+┃★│ • sticker [image]
 ┃★╰──────────────
 ╰━━━━━━━━━━━━━━━┈⊷
 > _*ᴄʀᴇᴀᴛᴇᴅ ʙʏ ᴍᴀɴɪꜱʜᴀ ᴄᴏᴅᴇʀ*_`
@@ -1670,7 +1610,44 @@ reply(`${e}`)
 }
 })
 
+cmd({
+    pattern: "ping",
+    alias: ["speed"],
+    desc: "Check bot's response time.",
+    category: "main",
+    react: "⚡",
+    filename: __filename
+},
+async (conn, mek, m, { from, quoted, sender, reply }) => {
+    try {
+        const start = new Date().getTime();
 
+        const reactionEmojis = ['🔥', '⚡', '🚀', '💨', '🎯', '🎉', '🌟', '💥', '🕐', '🔹'];
+        const textEmojis = ['💎', '🏆', '⚡️', '🚀', '🎶', '🌠', '🌀', '🔱', '🛡️', '✨'];
+
+        const reactionEmoji = reactionEmojis[Math.floor(Math.random() * reactionEmojis.length)];
+        let textEmoji = textEmojis[Math.floor(Math.random() * textEmojis.length)];
+
+        // Ensure reaction and text emojis are different
+        while (textEmoji === reactionEmoji) {
+            textEmoji = textEmojis[Math.floor(Math.random() * textEmojis.length)];
+        }
+
+        // Send reaction using conn.sendMessage()
+        await conn.sendMessage(from, {
+            react: { text: textEmoji, key: mek.key }
+        });
+
+        const end = new Date().getTime();
+        const responseTime = (end - start) / 1000;
+
+        await conn.sendMessage(from,{image: {url: config.ALIVE_IMG},caption: `*MANISHA-MD SPEED: ${responseTime.toFixed(2)}ms ${reactionEmoji}*`},{quoted: mek});
+        
+    } catch (e) {
+        console.error("Error in ping command:", e);
+        reply(`An error occurred: ${e.message}`);
+    }
+});
 
 
 cmd({
@@ -1767,64 +1744,6 @@ async (conn, mek, m, { from, args, q, reply, react }) => {
         console.error("Error in AI command:", e);
         await react("❌");
         reply("An error occurred while communicating with the AI.");
-    }
-});
-
-cmd({
-    pattern: "openai",
-    alias: ["chatgpt", "gpt3", "open-gpt"],
-    desc: "Chat with OpenAI",
-    category: "ai",
-    react: "🧠",
-    filename: __filename
-},
-async (conn, mek, m, { from, args, q, reply, react }) => {
-    try {
-        if (!q) return reply("Please provide a message for OpenAI.\nExample: `.openai Hello`");
-
-        const apiUrl = `https://vapis.my.id/api/openai?q=${encodeURIComponent(q)}`;
-        const { data } = await axios.get(apiUrl);
-
-        if (!data || !data.result) {
-            await react("❌");
-            return reply("OpenAI failed to respond. Please try again later.");
-        }
-
-        await reply(`🧠 *OpenAI Response:*\n\n${data.result}`);
-        await react("✅");
-    } catch (e) {
-        console.error("Error in OpenAI command:", e);
-        await react("❌");
-        reply("An error occurred while communicating with OpenAI.");
-    }
-});
-
-cmd({
-    pattern: "deepseek",
-    alias: ["deep", "seekai"],
-    desc: "Chat with DeepSeek AI",
-    category: "ai",
-    react: "🧠",
-    filename: __filename
-},
-async (conn, mek, m, { from, args, q, reply, react }) => {
-    try {
-        if (!q) return reply("Please provide a message for DeepSeek AI.\nExample: `.deepseek Hello`");
-
-        const apiUrl = `https://api.ryzendesu.vip/api/ai/deepseek?text=${encodeURIComponent(q)}`;
-        const { data } = await axios.get(apiUrl);
-
-        if (!data || !data.answer) {
-            await react("❌");
-            return reply("DeepSeek AI failed to respond. Please try again later.");
-        }
-
-        await reply(`🧠 *DeepSeek AI Response:*\n\n${data.answer}`);
-        await react("✅");
-    } catch (e) {
-        console.error("Error in DeepSeek AI command:", e);
-        await react("❌");
-        reply("An error occurred while communicating with DeepSeek AI.");
     }
 });
 //============OTHER COMMAND==================
@@ -2526,106 +2445,6 @@ cmd(
   }
 );
 
-
-cmd(
-  {
-    pattern: "img2url",
-    alias: ["telegraph", "i2u"],
-    desc: "Upload image to Telegra.ph and get a permanent URL",
-    category: "convert",
-    filename: __filename,
-  },
-  async (conn, mek, m, { quoted, reply }) => {
-    try {
-      if (!quoted || !quoted.imageMessage) {
-        return reply("❌ Please reply to an image to upload.");
-      }
-
-      // 📥 Download the image as a buffer
-      const media = await downloadMediaMessage(quoted, "buffer", {}, {});
-      if (!media) return reply("❌ Failed to download the image.");
-
-      // 📂 Save to a temporary file
-      const tempPath = path.join(__dirname, `temp_${Date.now()}.jpg`);
-      fs.writeFileSync(tempPath, media);
-
-      // 🌐 Upload to Telegra.ph
-      const form = new FormData();
-      form.append("file", fs.createReadStream(tempPath));
-
-      const res = await axios.post("https://telegra.ph/upload", form, {
-        headers: form.getHeaders(),
-      });
-
-      fs.unlinkSync(tempPath); // 🧹 Clean up the temp file
-
-      if (res.data && res.data[0] && res.data[0].src) {
-        const url = "https://telegra.ph" + res.data[0].src;
-        reply(`✅ Here is your image URL:\n${url}`);
-      } else {
-        reply("❌ Failed to upload to Telegra.ph.");
-      }
-
-    } catch (e) {
-      console.error(e);
-      reply(`❌ Error: ${e.message}`);
-    }
-  }
-);
-
-cmd(
-  {
-    pattern: "postimg",
-    alias: ["postimage", "imgpost"],
-    desc: "Upload replied image to postimages.org and get URL",
-    category: "convert",
-    filename: __filename,
-  },
-  async (conn, mek, m, { from, quoted, reply }) => {
-    try {
-      if (!quoted || !quoted.imageMessage) {
-        return reply("📎 Please *reply to an image* to upload.");
-      }
-
-      // Download image from message
-      const imageBuffer = await downloadMediaMessage(quoted, "buffer", {}, { logger: conn.logger, reuploadRequest: conn.updateMediaMessage });
-      if (!imageBuffer) return reply("❌ Failed to download image.");
-
-      // Prepare form data for PostImages
-      const form = new FormData();
-      form.append("upload_session", "");
-      form.append("numfiles", "1");
-      form.append("gallery", "");
-      form.append("uid", "0");
-      form.append("token", "91f9a9f7f88efb4"); // static token; still works for anonymous
-      form.append("upload[]", imageBuffer, {
-        filename: "image.png",
-        contentType: "image/png",
-      });
-
-      // Send upload request
-      const res = await axios.post("https://postimages.org/json/rr", form, {
-        headers: {
-          ...form.getHeaders(),
-          "Origin": "https://postimages.org",
-          "Referer": "https://postimages.org/",
-        },
-      });
-
-      if (res.data && res.data.url) {
-        return reply(`✅ Image uploaded successfully!\n\n📤 URL:\n${res.data.url}`);
-      } else {
-        return reply("❌ Failed to upload image to postimages.org.");
-      }
-
-    } catch (err) {
-      console.error("PostImages Upload Error:", err);
-      reply("🚫 Error uploading image: " + (err.response?.data?.error || err.message));
-    }
-  }
-);
-
-
 cmd({
   pattern: "npm",
   desc: "Search for a package on npm.",
@@ -3011,6 +2830,67 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
             react: { text: '❌', key: m.key }
         });
         return reply("❌ Failed to reject join requests.");
+    }
+});
+
+
+cmd({
+    pattern: "settings2",
+    react: "⚙️",
+    desc: "Shows bot settings list.",
+    category: "settings",
+    filename: __filename
+},
+async(conn, mek, m, {
+    from, quoted, body, isCmd, command, args, q, isGroup,
+    sender, senderNumber, botNumber2, botNumber, pushname,
+    isMe, isOwner, groupMetadata, groupName, participants,
+    groupAdmins, isBotAdmins, isAdmins, reply
+}) => {
+    try {
+        if (!isOwner) return reply("⛔️ You are not allowed to use this command!");
+
+        let buttons = [
+            {
+                buttonId: `${prefix}system`,
+                buttonText: { displayText: "🔧 System" },
+                type: 1,
+            },
+            {
+                buttonId: `${prefix}ping`,
+                buttonText: { displayText: "📶 Ping" },
+                type: 1,
+            },
+        ];
+
+        let buttonMessage = {
+            image: { url: config.ALIVE_IMG},
+            caption: `
+⦁──HASI-MD Settings──⦁
+
+1️⃣ Anti Link: .setvar ANTILINK:true/false  
+2️⃣ Auto Reaction: .setvar AUTO_REACTION:true/false  
+3️⃣ Auto Status Saver: .setvar AUTO_STATUS_SAVER:true/false  
+4️⃣ MongoDB URI: .setvar MONGODB_URI:your_mongodb_url  
+5️⃣ OpenAI API Key: .setvar OPENAI_API_KEY:key  
+6️⃣ Owner Number: .setvar OWNER_NUMBER:94xxxxxxxxx  
+7️⃣ Prefix: .setvar PREFIX:.  
+8️⃣ Work Type: .setvar WORKTYPE:public/private
+
+... and many more environment variables.
+
+© Hasi-MD V1.1
+`,
+            footer: config.FOOTER || "🤖 Hasi Bot System",
+            buttons: buttons,
+            headerType: 4
+        };
+
+        return await conn.sendMessage(from, buttonMessage, { quoted: mek });
+
+    } catch (e) {
+        console.log(e);
+        return reply(`❌ An error occurred: ${e}`);
     }
 });
 //============= module.exports simble===================
