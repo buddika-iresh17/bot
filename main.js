@@ -2833,38 +2833,38 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
     }
 });
 
-
 cmd({
-    pattern: "settings2",
+    pattern: "settings",
     react: "⚙️",
     desc: "Shows bot settings list.",
     category: "settings",
     filename: __filename
 },
-async(conn, mek, m, {
+async (conn, mek, m, {
     from, quoted, body, isCmd, command, args, q, isGroup,
     sender, senderNumber, botNumber2, botNumber, pushname,
     isMe, isOwner, groupMetadata, groupName, participants,
-    groupAdmins, isBotAdmins, isAdmins, reply
+    groupAdmins, isBotAdmins, isAdmins, reply, prefix
 }) => {
     try {
         if (!isOwner) return reply("⛔️ You are not allowed to use this command!");
 
+      
         let buttons = [
             {
-                buttonId: `${prefix}system`,
+                buttonId: `.system`,
                 buttonText: { displayText: "🔧 System" },
                 type: 1,
             },
             {
-                buttonId: `${prefix}ping`,
+                buttonId: `.ping`,
                 buttonText: { displayText: "📶 Ping" },
                 type: 1,
             },
         ];
 
         let buttonMessage = {
-            image: { url: config.ALIVE_IMG},
+            image: { url: Config.ALIVE_IMG},
             caption: `
 ⦁──HASI-MD Settings──⦁
 
@@ -2877,11 +2877,11 @@ async(conn, mek, m, {
 7️⃣ Prefix: .setvar PREFIX:.  
 8️⃣ Work Type: .setvar WORKTYPE:public/private
 
-... and many more environment variables.
+...and more environment variables.
 
 © Hasi-MD V1.1
 `,
-            footer: config.FOOTER || "🤖 Hasi Bot System",
+            footer: "🤖 manisha Bot System",
             buttons: buttons,
             headerType: 4
         };
