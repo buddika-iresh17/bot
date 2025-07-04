@@ -2834,65 +2834,38 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 });
 
 cmd({
-    pattern: "settings2",
-    react: "⚙️",
-    desc: "Shows bot settings list.",
-    category: "settings",
-    filename: __filename
+  pattern: "menu1",
+  react: "📜",
+  desc: "Show main menu",
+  category: "main",
+  filename: __filename
 },
-async (conn, mek, m, {
-    from, quoted, body, isCmd, command, args, q, isGroup,
-    sender, senderNumber, botNumber2, botNumber, pushname,
-    isMe, isOwner, groupMetadata, groupName, participants,
-    groupAdmins, isBotAdmins, isAdmins, reply, prefix
-}) => {
-    try {
-        if (!isOwner) return reply("⛔️ You are not allowed to use this command!");
+async (conn, mek, m, { from, quoted, pushname }) => {
+  const text = `👋 Hello *${pushname}*! 
 
-      
-        let buttons = [
-            {
-                buttonId: `.system`,
-                buttonText: { displayText: "🔧 System" },
-                type: 1,
-            },
-            {
-                buttonId: `.ping`,
-                buttonText: { displayText: "📶 Ping" },
-                type: 1,
-            },
-        ];
+📖 Here is your main menu:
 
-        let buttonMessage = {
-            image: { url: Config.ALIVE_IMG},
-            caption: `
-⦁──HASI-MD Settings──⦁
+📌 *Get Help* 👉 Help  
+📌 *Customer Support* 👉 Support  
+📌 *View Settings* 👉 Settings  
+📌 *Bot Info* 👉 Info  
+📌 *Check Weather* 👉 Weather Colombo`
 
-1️⃣ Anti Link: .setvar ANTILINK:true/false  
-2️⃣ Auto Reaction: .setvar AUTO_REACTION:true/false  
-3️⃣ Auto Status Saver: .setvar AUTO_STATUS_SAVER:true/false  
-4️⃣ MongoDB URI: .setvar MONGODB_URI:your_mongodb_url  
-5️⃣ OpenAI API Key: .setvar OPENAI_API_KEY:key  
-6️⃣ Owner Number: .setvar OWNER_NUMBER:94xxxxxxxxx  
-7️⃣ Prefix: .setvar PREFIX:.  
-8️⃣ Work Type: .setvar WORKTYPE:public/private
+  const footer = "🤖BOT MENU"
 
-...and more environment variables.
+  const image = { url: config.ALIVE_IMG} // Change to any image URL you want
+  const thumb = null // Optional thumbnail (use buffer or leave null)
 
-© Hasi-MD V1.1
-`,
-            footer: "🤖 manisha Bot System",
-            buttons: buttons,
-            headerType: 4
-        };
+  const buttons = [
+    { quickReplyButton: { displayText: "🆘 Help", id: "help" } },
+    { quickReplyButton: { displayText: "⚙️ Settings", id: "settings" } },
+    { quickReplyButton: { displayText: "📨 Support", id: "support" } },
+    { quickReplyButton: { displayText: "ℹ️ Info", id: "info" } },
+    { quickReplyButton: { displayText: "☀️ Weather", id: "weather colombo" } }
+  ]
 
-        return await conn.sendMessage(from, buttonMessage, { quoted: mek });
-
-    } catch (e) {
-        console.log(e);
-        return reply(`❌ An error occurred: ${e}`);
-    }
-});
+  await conn.send5ButImg(from, text, footer, image, buttons, thumb, { quoted: m })
+})
 //============= module.exports simble===================
 };
 //========================================================
