@@ -2834,43 +2834,102 @@ async (conn, mek, m, { from, quoted, body, isCmd, command, args, q, isGroup, sen
 });
 
 cmd({
-  pattern: "menu1",
-  react: "📜",
-  desc: "Show main menu",
-  category: "main",
-  filename: __filename
+    pattern: "settings1",
+    desc: "(setting list).",
+    category: "settings",
+    react: "⚙️",
+    filename: __filename,
+    use: '<text>',
 },
-async (conn, mek, m, { from, quoted, pushname }) => {
+async (conn, mek, text, { isCreator }) => {
+    if (!isCreator) {
+      return await conn.sendMessage(from, {
+        text: "*📛 This is an owner command.*"
+      }, { quoted: message });
+    }
 
-  const text = `👋 Hello *${pushname}*! 
+    let buttons = [
+        {
+            buttonId: `${config.PREFIX}system`,
+            buttonText: { displayText: "System" },
+            type: 1,
+        },
+        {
+            buttonId: `${config.PREFIX}ping`,
+            buttonText: { displayText: "Ping" },
+            type: 1,
+        },
+    ];
 
-📖 Here is your main menu:
+    let buttonMessage = {
+        image: {
+            url: config.ALIVE_IMG,
+        },
+        caption: `
+⦁──HASI-MD-Settings──⦁
 
-📌 *Get Help* 👉 Help  
-📌 *Customer Support* 👉 Support  
-📌 *View Settings* 👉 Settings  
-📌 *Bot Info* 👉 Info  
-📌 *Check Weather* 👉 Weather Colombo`
+1♻️➣ To put Antilink type :
+Eg:- .setvar ANTILINK:false
 
-  const footer = "🤖 BOT MENU"
+2♻️➣ To on/off Auto reaction type :
+Eg:- .setvar AUTO_REACTION:false/true
 
-  const buttons = [
-    { buttonId: "help", buttonText: { displayText: "🆘 Help" }, type: 1 },
-    { buttonId: "settings", buttonText: { displayText: "⚙️ Settings" }, type: 1 },
-    { buttonId: "support", buttonText: { displayText: "📨 Support" }, type: 1 },
-    { buttonId: "info", buttonText: { displayText: "ℹ️ Info" }, type: 1 },
-    { buttonId: "weather colombo", buttonText: { displayText: "☀️ Weather" }, type: 1 }
-  ]
+3♻️➣ To on/off Auto read status type :
+Eg:- .setvar AUTO_READ_STATUS:false/true
 
-  await conn.sendMessage(from, {
-    image: { url: config.ALIVE_IMG },
-    caption: text,
-    footer: footer,
-    buttons: buttons,
-    headerType: 4
-  }, { quoted: mek })
+4♻️➣ To on/off Auto status save type :
+Eg:- .setvar AUTO_STATUS_SAVER:false/true
 
-})
+5♻️➣ To on/off heroku type :
+Eg:- .setvar HEROKU:false/true
+
+6♻️➣ To put Heroku api key type :
+Eg:- .setvar HEROKU_API_KEY:put api key
+
+7♻️➣ To put Heroku app name type :
+Eg:- .setvar HEROKU_APP_NAME:put app name
+
+8♻️➣ To on/off Level up message type :
+Eg:- .setvar LEVEL_UP_MESSAGE:false/true
+
+9♻️➣ To put Mongodb url type :
+Eg:- .setvar MONGODB_URI:put mongodb url
+
+10♻️➣ To put Open api key type :
+Eg:- .setvar OPENAI_API_KEY:put open api key
+
+11♻️➣ To put Owner name type :
+Eg:- .setvar OWNER_NAME:put name
+
+12♻️➣ To put Owner number type :
+Eg:- .setvar OWNER_NUMBER:92xxxxxx
+
+13♻️➣ To put Pack info type :
+Eg:- .setvar PACK_INFO:put any name
+
+14♻️➣ To put prefix type :
+Eg:- .setvar PREFIX:.
+
+15♻️➣ To on/off Auto Read message type :
+Eg:- .setvar READ_MESSAGE:false/true
+
+16♻️➣ To put thumb image type :
+Eg:- .setvar THUMB_IMAGE:put image url
+
+17♻️➣ To public/private type :
+Eg:- .setvar WORKTYPE:public/private
+
+© Hasi-MD V1.1
+`,
+        footer: footer,
+        headerType: 4,
+        buttons
+    };
+
+    return conn.sendMessage(mek.chat, buttonMessage, {
+        quoted: mek,
+    });
+});
 //============= module.exports simble===================
 };
 //========================================================
