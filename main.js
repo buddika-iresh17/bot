@@ -2845,7 +2845,7 @@ async (conn, mek, text, { isCreator }) => {
     if (!isCreator) {
       return await conn.sendMessage(from, {
         text: "*📛 This is an owner command.*"
-      }, { quoted: message });
+      }, { quoted: mek });
     }
 
     let buttons = [
@@ -2860,6 +2860,9 @@ async (conn, mek, text, { isCreator }) => {
             type: 1,
         },
     ];
+
+    // ✅ Define footer here
+    let footer = "⚙️ MANISHA-MD Settings Panel";
 
     let buttonMessage = {
         image: {
@@ -2921,7 +2924,7 @@ Eg:- .setvar WORKTYPE:public/private
 
 © Hasi-MD V1.1
 `,
-        footer: footer,
+        footer: footer, // ✅ footer is now defined
         headerType: 4,
         buttons
     };
