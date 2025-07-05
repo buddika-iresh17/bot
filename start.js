@@ -21,7 +21,7 @@ const {
     Browsers
   } = require('@whiskeysockets/baileys')
   const l = console.log
-  const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson, AntiDelDB, initializeAntiDeleteSettings, setAnti, getAnti, getAllAntiDeleteSettings, saveContact, loadMessage, getName, getChatSummary, saveGroupMetadata, getGroupMetadata, saveMessageCount, getInactiveGroupMembers, getGroupMembersMessageCount, saveMessage, sms, downloadMediaMessage, AntiDelete } = require('./connect')
+  const { getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson, AntiDelDB, initializeAntiDeleteSettings, setAnti, getAnti, getAllAntiDeleteSettings, saveContact, loadMessage, getName, getChatSummary, saveGroupMetadata, getGroupMetadata, saveMessageCount, getInactiveGroupMembers, getGroupMembersMessageCount, saveMessage, sms, downloadMediaMessage, AntiDelete, events } = require('./connect')
   const fs = require('fs')
   const ff = require('fluent-ffmpeg')
   const P = require('pino')
@@ -45,7 +45,6 @@ const {
   if (!fs.existsSync(tempDir)) {
       fs.mkdirSync(tempDir)
   }
-  
   const clearTempDir = () => {
       fs.readdir(tempDir, (err, files) => {
           if (err) throw err;
@@ -117,7 +116,7 @@ conn.ev.on('connection.update', async (update) => {
       loadPlugins(conn);
       console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Plugins loaded successfully ✅...");
     } catch (err) {
-      console.error("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Error loading main.js:", err);
+      console.error("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Error loading main.js ❌...", err);
     }
 console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 bot internet connected 🌐...");  
 console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 plugins .js file Connect 🔗...");  
@@ -153,9 +152,9 @@ console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 creatad by manisha coder 👨�
         caption: up,
       });
 
-      console.log("✅ Connected message sent to owner.");
+      console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Connected message sent to owner 😎...");
     } catch (err) {
-      console.error("❌ Failed to send image message:", err.message);
+      console.error("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Failed to send image message ❌...", err.message);
     }
   }
 });
@@ -319,7 +318,6 @@ if (!isReact && config.AUTO_REACT === 'true') {
    
   // take commands 
                  
-  const events = require('./command')
   const cmdName = isCmd ? body.slice(1).trim().split(" ")[0].toLowerCase() : false;
   if (isCmd) {
   const cmd = events.commands.find((cmd) => cmd.pattern === (cmdName)) || events.commands.find((cmd) => cmd.alias && cmd.alias.includes(cmdName))

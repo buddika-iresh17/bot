@@ -807,5 +807,20 @@ const AntiDelete = async (conn, updates) => {
         }
     }
 };
+
+//=================
+var commands = [];
+
+function cmd(info, func) {
+    var data = info;
+    data.function = func;
+    if (!data.dontAddCommandList) data.dontAddCommandList = false;
+    if (!info.desc) info.desc = '';
+    if (!data.fromMe) data.fromMe = false;
+    if (!info.category) data.category = 'misc';
+    if(!info.filename) data.filename = "Not Provided";
+    commands.push(data);
+    return data;
+}
 //===================
-module.exports = {DATABASE, getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson, sms, downloadMediaMessage, saveContact, loadMessage, getName, getChatSummary, saveGroupMetadata, getGroupMetadata, saveMessageCount, getInactiveGroupMembers, getGroupMembersMessageCount, saveMessage: saveMessageV2, UpdateDB, setCommitHash, getCommitHash, AntiDelDB, initializeAntiDeleteSettings, setAnti, getAnti,  DeletedText, DeletedMedia, AntiDelete,}
+module.exports = {DATABASE, getBuffer, getGroupAdmins, getRandom, h2k, isUrl, Json, runtime, sleep, fetchJson, sms, downloadMediaMessage, saveContact, loadMessage, getName, getChatSummary, saveGroupMetadata, getGroupMetadata, saveMessageCount, getInactiveGroupMembers, getGroupMembersMessageCount, saveMessage: saveMessageV2, UpdateDB, setCommitHash, getCommitHash, AntiDelDB, initializeAntiDeleteSettings, setAnti, getAnti,  DeletedText, DeletedMedia, AntiDelete,cmd, AddCommand:cmd, Function:cmd, Module:cmd, commands,}
