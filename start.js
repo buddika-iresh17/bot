@@ -58,7 +58,54 @@ const {
   
   // Clear the temp directory every 5 minutes
   setInterval(clearTempDir, 5 * 60 * 1000);
-  
+  //===============
+  var commands = [];
+
+function cmd(info, func) {
+  let data = { ...info };
+  data.function = func;
+  if (typeof data.dontAddCommandList === 'undefined') data.dontAddCommandList = false;
+  if (!data.desc) data.desc = '';
+  if (typeof data.fromMe === 'undefined') data.fromMe = false;
+  if (!data.category) data.category = 'misc';
+  if (!data.filename) data.filename = "Not Provided";
+  commands.push(data);
+  return data;
+}
+
+// ========== command ======================
+cmd({
+      pattern: "alive",
+      alias: ["online"],
+      desc: "Chek Bot Alive",
+      fromMe: true,
+      category: "main",
+      react: "👋",
+      filename: __filename
+    },
+    
+    async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
+    try{
+          
+          // Status message to be sent
+          let desc = `╔══╣❍ᴀʟɪᴠᴇ❍╠═══⫸
+╠➢ *ᴘᴏᴡᴇʀꜰᴜʟʟ ᴊᴀᴠᴀꜱᴄʀɪᴘᴛ ᴡʜᴀᴛꜱᴀᴘᴘ ʙᴏᴛ ...*
+╠➢ *ᴏᴡɴᴇʀ : 94721551183 ...*
+╠➢ *ᴠᴇʀꜱɪᴏɴ :* *1.0 ...*
+╠➢ *ᴡʜᴀᴛꜱᴀᴘᴘ ᴄʜᴀɴɴᴇʟ : https://whatsapp.com/channel/0029VbAdMtMGk1G1R9Yg2L3x*
+╚═════════════════⫸
+
+> _*ᴄʀᴇᴀᴛᴇᴅ ʙʏ ᴍᴀɴɪꜱʜᴀ ᴄᴏᴅᴇʀ*_`
+
+          // Sending the image with caption
+await conn.sendMessage(from,{image: {url: config.ALIVE_IMG},caption: desc},{quoted: mek });
+
+      } catch (e) {
+          console.error(e);
+          reply(`*Error:* ${e.message}`);
+      }
+    });
+
   //===================SESSION-AUTH============================
 if (!fs.existsSync('./creds.json')) {
   if (!config.SESSION_ID) return console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Please add your session id ! 😥...")
@@ -308,25 +355,6 @@ if (!isReact && config.AUTO_REACT === 'true') {
   if(!isOwner && isGroup && config.MODE === "inbox") return
   if(!isOwner && !isGroup && config.MODE === "groups") return
    
-  // take commands 
-                 
- // Commands list
-var commands = [];
-
-// Command registration function
-function cmd(info, func) {
-  // shallow copy so original info object is not mutated unintentionally
-  let data = { ...info };
-  data.function = func;
-  if (typeof data.dontAddCommandList === 'undefined') data.dontAddCommandList = false;
-  if (!data.desc) data.desc = '';
-  if (typeof data.fromMe === 'undefined') data.fromMe = false;
-  if (!data.category) data.category = 'misc';
-  if (!data.filename) data.filename = "Not Provided";
-  commands.push(data);
-  return data;
-}
-
 // Example function to process incoming messages (call this inside your message handler)
 async function processMessage({ conn, mek, m, body, isCmd, from }) {
   const {
@@ -972,36 +1000,6 @@ async function processMessage({ conn, mek, m, body, isCmd, from }) {
         };
     conn.serializeM = mek => sms(conn, mek, store);
   }
-//======================================
-cmd({
-      pattern: "owner",
-      alias: ["owner"],
-      desc: "Bot owner",
-      category: "main",
-      react: "👨‍💻",
-      filename: __filename
-    },
-    
-    async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-    try{
-          
-          // Status message to be sent
-          let desc = `╔══╣❍ᴏᴡɴᴇʀ❍╠═══⫸
-╠➢ *ᴏᴡɴᴇʀ :* *94721551183 ...*
-╠➢ *ᴡʜᴀᴛꜱᴀᴘᴘ ᴄʜᴀɴɴᴇʟ :* *https://whatsapp.com/channel/0029VbAdMtMGk1G1R9Yg2L3x*
-╚═════════════════⫸
-
-> _*ᴄʀᴇᴀᴛᴇᴅ ʙʏ ᴍᴀɴɪꜱʜᴀ ᴄᴏᴅᴇʀ*_`
-
-          // Sending the image with caption
-await conn.sendMessage(from,{image: {url: config.ALIVE_IMG},caption: desc},{quoted: mek });
-
-      } catch (e) {
-          console.error(e);
-          reply(`*Error:* ${e.message}`);
-      }
-    });
-
 //======================================
   app.get("/", (req, res) => {
   res.send("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 bot start 🚩...");
