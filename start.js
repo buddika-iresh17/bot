@@ -59,54 +59,7 @@ const {
   
   // Clear the temp directory every 5 minutes
   setInterval(clearTempDir, 5 * 60 * 1000);
-  //===============
-  var commands = [];
-
-function cmd(info, func) {
-  let data = { ...info };
-  data.function = func;
-  if (typeof data.dontAddCommandList === 'undefined') data.dontAddCommandList = false;
-  if (!data.desc) data.desc = '';
-  if (typeof data.fromMe === 'undefined') data.fromMe = false;
-  if (!data.category) data.category = 'misc';
-  if (!data.filename) data.filename = "Not Provided";
-  commands.push(data);
-  return data;
-}
-
-// ========== command ======================
-cmd({
-      pattern: "alive",
-      alias: ["online"],
-      desc: "Chek Bot Alive",
-      fromMe: true,
-      category: "main",
-      react: "👋",
-      filename: __filename
-    },
-    
-    async(conn, mek, m,{from, quoted, body, isCmd, command, args, q, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply}) => {
-    try{
-          
-          // Status message to be sent
-          let desc = `╔══╣❍ᴀʟɪᴠᴇ❍╠═══⫸
-╠➢ *ᴘᴏᴡᴇʀꜰᴜʟʟ ᴊᴀᴠᴀꜱᴄʀɪᴘᴛ ᴡʜᴀᴛꜱᴀᴘᴘ ʙᴏᴛ ...*
-╠➢ *ᴏᴡɴᴇʀ : 94721551183 ...*
-╠➢ *ᴠᴇʀꜱɪᴏɴ :* *1.0 ...*
-╠➢ *ᴡʜᴀᴛꜱᴀᴘᴘ ᴄʜᴀɴɴᴇʟ : https://whatsapp.com/channel/0029VbAdMtMGk1G1R9Yg2L3x*
-╚═════════════════⫸
-
-> _*ᴄʀᴇᴀᴛᴇᴅ ʙʏ ᴍᴀɴɪꜱʜᴀ ᴄᴏᴅᴇʀ*_`
-
-          // Sending the image with caption
-await conn.sendMessage(from,{image: {url: config.ALIVE_IMG},caption: desc},{quoted: mek });
-
-      } catch (e) {
-          console.error(e);
-          reply(`*Error:* ${e.message}`);
-      }
-    });
-
+  
   //===================SESSION-AUTH============================
 if (!fs.existsSync('./creds.json')) {
   if (!config.SESSION_ID) return console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Please add your session id ! 😥...")
@@ -157,7 +110,15 @@ conn.ev.on('connection.update', async (update) => {
       connectToWA(); // reconnect function call
     }
   } else if (connection === 'open') {
-console.log("🌀 MANISHA-MD: Plugins Installing...");
+    console.log("🌀 MANISHA-MD 💕 Plugins Installing 🔌...");
+
+    try {
+      const loadPlugins = require(path.join(__dirname, 'main.js'));
+      loadPlugins(conn);
+      console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Plugins loaded successfully ✅...");
+    } catch (err) {
+      console.error("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Error loading main.js ❌...", err);
+    }
 console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 bot internet connected 🌐...");  
 console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 plugins .js file Connect 🔗...");  
 console.log("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 Fetching MANISHA-MD data 📚...");  
@@ -356,213 +317,40 @@ if (!isReact && config.AUTO_REACT === 'true') {
   if(!isOwner && isGroup && config.MODE === "inbox") return
   if(!isOwner && !isGroup && config.MODE === "groups") return
    
-// Example function to process incoming messages (call this inside your message handler)
-async function processMessage({ conn, mek, m, body, isCmd, from }) {
-  const {
-    quoted,
-    command,
-    args,
-    q,
-    text,
-    isGroup,
-    sender,
-    senderNumber,
-    botNumber2,
-    botNumber,
-    pushname,
-    isMe,
-    isOwner,
-    isCreator,
-    groupMetadata,
-    groupName,
-    participants,
-    groupAdmins,
-    isBotAdmins,
-    isAdmins,
-    reply,
-  } = m; // assuming m contains all these props or you get them from your context
-
-  // Extract command name from message body
-  const cmdName = isCmd
-    ? body.slice(1).trim().split(" ")[0].toLowerCase()
-    : false;
-
-  if (isCmd && cmdName) {
-    // Find the command by pattern or alias
-    const command = commands.find(
-      (c) => c.pattern === cmdName || (c.alias && c.alias.includes(cmdName))
-    );
-    if (command) {
-      if (command.react) {
-        // Send reaction if defined
-        await conn.sendMessage(from, { react: { text: command.react, key: mek.key } });
-      }
-      try {
-        await command.function(conn, mek, m, {
-          from,
-          quoted,
-          body,
-          isCmd,
-          command,
-          args,
-          q,
-          text,
-          isGroup,
-          sender,
-          senderNumber,
-          botNumber2,
-          botNumber,
-          pushname,
-          isMe,
-          isOwner,
-          isCreator,
-          groupMetadata,
-          groupName,
-          participants,
-          groupAdmins,
-          isBotAdmins,
-          isAdmins,
-          reply,
-        });
-      } catch (e) {
-        console.error("[PLUGIN ERROR] " + e);
-      }
-    }
+  // take commands 
+                 
+  const events = require('./command')
+  const cmdName = isCmd ? body.slice(1).trim().split(" ")[0].toLowerCase() : false;
+  if (isCmd) {
+  const cmd = events.commands.find((cmd) => cmd.pattern === (cmdName)) || events.commands.find((cmd) => cmd.alias && cmd.alias.includes(cmdName))
+  if (cmd) {
+  if (cmd.react) conn.sendMessage(from, { react: { text: cmd.react, key: mek.key }})
+  
+  try {
+  cmd.function(conn, mek, m,{from, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply});
+  } catch (e) {
+  console.error("[PLUGIN ERROR] " + e);
   }
-
-  // Run commands listening to certain message types or events
-  for (const command of commands) {
-    if (body && command.on === "body") {
-      try {
-        await command.function(conn, mek, m, {
-          from,
-          quoted,
-          body,
-          isCmd,
-          command,
-          args,
-          q,
-          text,
-          isGroup,
-          sender,
-          senderNumber,
-          botNumber2,
-          botNumber,
-          pushname,
-          isMe,
-          isOwner,
-          isCreator,
-          groupMetadata,
-          groupName,
-          participants,
-          groupAdmins,
-          isBotAdmins,
-          isAdmins,
-          reply,
-        });
-      } catch (e) {
-        console.error("[PLUGIN ERROR on 'body'] " + e);
-      }
-    } else if (mek.q && command.on === "text") {
-      try {
-        await command.function(conn, mek, m, {
-          from,
-          quoted,
-          body,
-          isCmd,
-          command,
-          args,
-          q,
-          text,
-          isGroup,
-          sender,
-          senderNumber,
-          botNumber2,
-          botNumber,
-          pushname,
-          isMe,
-          isOwner,
-          isCreator,
-          groupMetadata,
-          groupName,
-          participants,
-          groupAdmins,
-          isBotAdmins,
-          isAdmins,
-          reply,
-        });
-      } catch (e) {
-        console.error("[PLUGIN ERROR on 'text'] " + e);
-      }
-    } else if (
-      (command.on === "image" || command.on === "photo") &&
-      mek.type === "imageMessage"
-    ) {
-      try {
-        await command.function(conn, mek, m, {
-          from,
-          quoted,
-          body,
-          isCmd,
-          command,
-          args,
-          q,
-          text,
-          isGroup,
-          sender,
-          senderNumber,
-          botNumber2,
-          botNumber,
-          pushname,
-          isMe,
-          isOwner,
-          isCreator,
-          groupMetadata,
-          groupName,
-          participants,
-          groupAdmins,
-          isBotAdmins,
-          isAdmins,
-          reply,
-        });
-      } catch (e) {
-        console.error("[PLUGIN ERROR on 'image'] " + e);
-      }
-    } else if (command.on === "sticker" && mek.type === "stickerMessage") {
-      try {
-        await command.function(conn, mek, m, {
-          from,
-          quoted,
-          body,
-          isCmd,
-          command,
-          args,
-          q,
-          text,
-          isGroup,
-          sender,
-          senderNumber,
-          botNumber2,
-          botNumber,
-          pushname,
-          isMe,
-          isOwner,
-          isCreator,
-          groupMetadata,
-          groupName,
-          participants,
-          groupAdmins,
-          isBotAdmins,
-          isAdmins,
-          reply,
-        });
-      } catch (e) {
-        console.error("[PLUGIN ERROR on 'sticker'] " + e);
-      }
-    }
   }
-}
-});
+  }
+  events.commands.map(async(command) => {
+  if (body && command.on === "body") {
+  command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
+  } else if (mek.q && command.on === "text") {
+  command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
+  } else if (
+  (command.on === "image" || command.on === "photo") &&
+  mek.type === "imageMessage"
+  ) {
+  command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
+  } else if (
+  command.on === "sticker" &&
+  mek.type === "stickerMessage"
+  ) {
+  command.function(conn, mek, m,{from, l, quoted, body, isCmd, command, args, q, text, isGroup, sender, senderNumber, botNumber2, botNumber, pushname, isMe, isOwner, isCreator, groupMetadata, groupName, participants, groupAdmins, isBotAdmins, isAdmins, reply})
+  }});
+  
+  });
     //===================================================   
     conn.decodeJid = jid => {
       if (!jid) return jid;
@@ -1001,7 +789,7 @@ async function processMessage({ conn, mek, m, body, isCmd, from }) {
         };
     conn.serializeM = mek => sms(conn, mek, store);
   }
-//======================================
+  
   app.get("/", (req, res) => {
   res.send("🌀 ᴍᴀɴɪꜱʜᴀ-ᴍᴅ 💕 bot start 🚩...");
   });
