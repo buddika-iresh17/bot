@@ -533,7 +533,7 @@ async function processMessage({ conn, mek, m, body, isCmd, from }) {
     }
   }
 }
-}
+});
     //===================================================   
     conn.decodeJid = jid => {
       if (!jid) return jid;
