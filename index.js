@@ -10,11 +10,11 @@ require('dotenv').config({ path: './config.env' });
 const app = express();
 const PORT = 3000;
 
-const GITHUB_ZIP_URL = 'https://github.com/buddika-iresh17/BOT-ZIP/raw/refs/heads/main/MANISHA-MD2.zip';
+const GITHUB_ZIP_URL = 'https://github.com/buddika-iresh17/BOT-ZIP/raw/refs/heads/main/MANISHA-MD.zip';
 const DOWNLOAD_PATH = path.resolve(__dirname, 'bot_temp');
 const ZIP_PATH = path.join(DOWNLOAD_PATH, 'repo.zip');
 const EXTRACT_PATH = path.join(DOWNLOAD_PATH, 'extracted');
-const ZIP_PASSWORD = 'pmanisha19@';
+const ZIP_PASSWORD = 'manisha19@';
 const ENV_PATH = path.resolve(__dirname, 'config.env');
 
 app.use(express.urlencoded({ extended: true }));
