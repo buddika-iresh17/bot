@@ -186,17 +186,15 @@
       const formData = new FormData(form);
       const data = {};
       formData.forEach((value, key) => {
-        if (
-          form.elements[key].type === 'checkbox'
-        ) {
+        if (form.elements[key].type === 'checkbox') {
           data[key] = form.elements[key].checked ? 'true' : 'false';
         } else {
           data[key] = value;
         }
       });
 
-      document.getElementById('message').textContent = 'Saving...';
-
+      const msgEl = document.getElementById('message');
+      msgEl.textContent = 'Saving...';
       try {
         const res = await fetch('/save-config', {
           method: 'POST',
@@ -205,12 +203,12 @@
         });
         const text = await res.text();
         if (res.ok) {
-          document.getElementById('message').textContent = text;
+          msgEl.textContent = text;
         } else {
-          document.getElementById('message').textContent = 'Error: ' + text;
+          msgEl.textContent = 'Error: ' + text;
         }
       } catch (err) {
-        document.getElementById('message').textContent = 'Request failed.';
+        msgEl.textContent = 'Request failed.';
       }
     });
 
