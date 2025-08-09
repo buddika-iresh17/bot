@@ -2,112 +2,219 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Bot Config.env Setup</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bot Settings</title>
   <style>
-    label { display: block; margin-top: 10px; font-weight: bold; }
-    input, textarea { width: 400px; }
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 600px;
+      margin: 30px auto;
+      padding: 0 15px;
+      background: #f9f9f9;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    form {
+      background: #fff;
+      border: 1px solid #ddd;
+      padding: 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+      color: #555;
+    }
+    input[type="text"],
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      margin-top: 5px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      box-sizing: border-box;
+      font-size: 1rem;
+    }
+    input[type="checkbox"] {
+      margin-right: 6px;
+    }
+    button {
+      margin-top: 25px;
+      width: 100%;
+      padding: 12px;
+      background-color: #007bff;
+      border: none;
+      color: white;
+      font-size: 1.1rem;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:disabled {
+      background-color: #999;
+      cursor: not-allowed;
+    }
+    #message {
+      margin-top: 15px;
+      font-weight: bold;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-  <h1>Configure Bot Settings</h1>
-  <form id="configForm">
-    <label for="SESSION_ID">SESSION_ID</label>
-    <textarea id="SESSION_ID" name="SESSION_ID" rows="5" required></textarea>
+  <h1>Bot Settings</h1>
+  <form id="settingsForm">
+    <label for="SESSION_ID">SESSION_ID (required)</label>
+    <input type="text" id="SESSION_ID" name="SESSION_ID" required />
 
     <label for="MODE">MODE</label>
-    <input id="MODE" name="MODE" placeholder="private" />
+    <select id="MODE" name="MODE">
+      <option value="private">Private</option>
+      <option value="public">Public</option>
+      <option value="self">Self</option>
+      <option value="group">Group</option>
+    </select>
 
     <label for="PREFIX">PREFIX</label>
-    <input id="PREFIX" name="PREFIX" placeholder="." />
+    <input type="text" id="PREFIX" name="PREFIX" value="." />
 
-    <label for="AUTO_REACT">AUTO_REACT</label>
-    <input id="AUTO_REACT" name="AUTO_REACT" placeholder="true or false" />
+    <label>
+      <input type="checkbox" id="AUTO_REACT" name="AUTO_REACT" />
+      AUTO_REACT
+    </label>
 
     <label for="ANTI_DEL_PATH">ANTI_DEL_PATH</label>
-    <input id="ANTI_DEL_PATH" name="ANTI_DEL_PATH" placeholder="inbox" />
+    <input type="text" id="ANTI_DEL_PATH" name="ANTI_DEL_PATH" value="inbox" />
 
-    <label for="DEV">DEV</label>
-    <input id="DEV" name="DEV" />
+    <label for="DEV">DEV (optional)</label>
+    <input type="text" id="DEV" name="DEV" />
 
-    <label for="READ_MESSAGE">READ_MESSAGE</label>
-    <input id="READ_MESSAGE" name="READ_MESSAGE" placeholder="true or false" />
+    <label>
+      <input type="checkbox" id="READ_MESSAGE" name="READ_MESSAGE" />
+      READ_MESSAGE
+    </label>
 
-    <label for="AUTO_READ_STATUS">AUTO_READ_STATUS</label>
-    <input id="AUTO_READ_STATUS" name="AUTO_READ_STATUS" placeholder="true or false" />
+    <label>
+      <input type="checkbox" id="AUTO_READ_STATUS" name="AUTO_READ_STATUS" />
+      AUTO_READ_STATUS
+    </label>
 
-    <label for="AUTO_STATUS_REPLY">AUTO_STATUS_REPLY</label>
-    <input id="AUTO_STATUS_REPLY" name="AUTO_STATUS_REPLY" placeholder="true or false" />
+    <label>
+      <input type="checkbox" id="AUTO_STATUS_REPLY" name="AUTO_STATUS_REPLY" />
+      AUTO_STATUS_REPLY
+    </label>
 
-    <label for="AUTO_STATUS_REACT">AUTO_STATUS_REACT</label>
-    <input id="AUTO_STATUS_REACT" name="AUTO_STATUS_REACT" placeholder="true or false" />
+    <label>
+      <input type="checkbox" id="AUTO_STATUS_REACT" name="AUTO_STATUS_REACT" />
+      AUTO_STATUS_REACT
+    </label>
 
-    <label for="AUTOLIKESTATUS">AUTOLIKESTATUS</label>
-    <input id="AUTOLIKESTATUS" name="AUTOLIKESTATUS" placeholder="true or false" />
+    <label>
+      <input type="checkbox" id="AUTOLIKESTATUS" name="AUTOLIKESTATUS" />
+      AUTOLIKESTATUS
+    </label>
 
-    <label for="AUTO_TYPING">AUTO_TYPING</label>
-    <input id="AUTO_TYPING" name="AUTO_TYPING" placeholder="true or false" />
+    <label>
+      <input type="checkbox" id="AUTO_TYPING" name="AUTO_TYPING" checked />
+      AUTO_TYPING
+    </label>
 
-    <label for="AUTO_RECORDING">AUTO_RECORDING</label>
-    <input id="AUTO_RECORDING" name="AUTO_RECORDING" placeholder="true or false" />
+    <label>
+      <input type="checkbox" id="AUTO_RECORDING" name="AUTO_RECORDING" checked />
+      AUTO_RECORDING
+    </label>
 
-    <label for="ALWAYS_ONLINE">ALWAYS_ONLINE</label>
-    <input id="ALWAYS_ONLINE" name="ALWAYS_ONLINE" placeholder="true or false" />
+    <label>
+      <input type="checkbox" id="ALWAYS_ONLINE" name="ALWAYS_ONLINE" checked />
+      ALWAYS_ONLINE
+    </label>
 
-    <label for="ANTI_CALL">ANTI_CALL</label>
-    <input id="ANTI_CALL" name="ANTI_CALL" placeholder="true or false" />
+    <label>
+      <input type="checkbox" id="ANTI_CALL" name="ANTI_CALL" />
+      ANTI_CALL
+    </label>
 
-    <label for="BAD_NUMBER_BLOCKER">BAD_NUMBER_BLOCKER</label>
-    <input id="BAD_NUMBER_BLOCKER" name="BAD_NUMBER_BLOCKER" placeholder="true or false" />
+    <label>
+      <input type="checkbox" id="BAD_NUMBER_BLOCKER" name="BAD_NUMBER_BLOCKER" />
+      BAD_NUMBER_BLOCKER
+    </label>
 
     <label for="UNIFIED_PROTECTION">UNIFIED_PROTECTION</label>
-    <input id="UNIFIED_PROTECTION" name="UNIFIED_PROTECTION" placeholder="off, warn, kick, strict" />
+    <select id="UNIFIED_PROTECTION" name="UNIFIED_PROTECTION">
+      <option value="kick">kick</option>
+      <option value="block">block</option>
+      <option value="none">none</option>
+    </select>
 
-    <br /><br />
-    <button type="submit">Save Config & Start Bot</button>
+    <button type="submit">Save & Run Bot</button>
   </form>
 
-  <p id="response"></p>
+  <div id="message"></div>
 
   <script>
-    async function loadConfig() {
+    async function fetchConfig() {
       try {
         const res = await fetch('/config.env');
         if (!res.ok) return;
         const text = await res.text();
         const lines = text.split('\n');
-        const form = document.getElementById('configForm');
         lines.forEach(line => {
-          if (!line) return;
-          const [key, ...vals] = line.split('=');
-          if (form.elements[key]) {
-            form.elements[key].value = vals.join('=').trim();
+          const [key, value] = line.split('=');
+          if (!key) return;
+          const el = document.querySelector(`[name="${key}"]`);
+          if (!el) return;
+
+          if (el.type === 'checkbox') {
+            el.checked = value === 'true';
+          } else if (el.tagName === 'SELECT') {
+            el.value = value;
+          } else {
+            el.value = value;
           }
         });
-      } catch {}
+      } catch (err) {
+        console.error('Failed to fetch config.env', err);
+      }
     }
 
-    const form = document.getElementById('configForm');
-    const response = document.getElementById('response');
-
-    form.addEventListener('submit', async e => {
+    document.getElementById('settingsForm').addEventListener('submit', async e => {
       e.preventDefault();
-      const data = new URLSearchParams(new FormData(form));
+      const form = e.target;
+      const formData = new FormData(form);
+      const data = {};
+      formData.forEach((value, key) => {
+        if (
+          form.elements[key].type === 'checkbox'
+        ) {
+          data[key] = form.elements[key].checked ? 'true' : 'false';
+        } else {
+          data[key] = value;
+        }
+      });
 
-      response.textContent = 'Saving config and starting bot...';
+      document.getElementById('message').textContent = 'Saving...';
 
       try {
         const res = await fetch('/save-config', {
           method: 'POST',
-          body: data,
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams(data),
         });
         const text = await res.text();
-        response.textContent = text;
-      } catch {
-        response.textContent = 'Failed to save config.';
+        if (res.ok) {
+          document.getElementById('message').textContent = text;
+        } else {
+          document.getElementById('message').textContent = 'Error: ' + text;
+        }
+      } catch (err) {
+        document.getElementById('message').textContent = 'Request failed.';
       }
     });
 
-    loadConfig();
+    fetchConfig();
   </script>
 </body>
 </html>
