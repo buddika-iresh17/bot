@@ -38,14 +38,12 @@ app.get('/config.env', (req, res) => {
 
 // Save config.env from form POST
 app.post('/save-config', async (req, res) => {
-  // Extract form fields (expand if you want more keys)
   const SESSION_ID = req.body.SESSION_ID;
 
   if (!SESSION_ID || SESSION_ID.trim() === '') {
     return res.status(400).send('SESSION_ID is required');
   }
 
-  // Build config.env content (add more keys if needed)
   const configContent = `SESSION_ID=${SESSION_ID.trim()}
 MODE=${req.body.MODE || 'private'}
 PREFIX=${req.body.PREFIX || '.'}
@@ -72,7 +70,6 @@ UNIFIED_PROTECTION=${req.body.UNIFIED_PROTECTION || 'kick'}
     return res.status(500).send('Failed to save config');
   }
 
-  // Restart bot with new config
   try {
     await setupAndRunBot();
     res.send('Config saved and bot started successfully!');
@@ -102,7 +99,10 @@ async function setupAndRunBot() {
   await new Promise((resolve, reject) => {
     const extractor = extractFull(ZIP_PATH, EXTRACT_PATH, {
       password: ZIP_PASSWORD,
-      $bin: '7z',
+      // <-- මෙතන ඔබගේ OS අනුව 7z full path එක දාන්න
+      // උදා: Linux/macOS: '/usr/bin/7z'
+      // Windows: 'C:\\Program Files\\7-Zip\\7z.exe'
+      $bin: '/usr/bin/7z',
     });
     extractor.on('end', () => {
       console.log(chalk.green('Extraction complete.'));
@@ -113,8 +113,7 @@ async function setupAndRunBot() {
 
   const mainFolder = getFirstFolder(EXTRACT_PATH);
 
-  // Instead of copying config.js, create it dynamically from config.env variables:
-  // read config.env and generate config.js on the fly
+  // Generate config.js dynamically from config.env
   const envData = fs.readFileSync(ENV_PATH, 'utf-8');
   const configJsContent = envData
     .split(/\r?\n/)
@@ -122,7 +121,6 @@ async function setupAndRunBot() {
     .map(line => {
       const [key, val] = line.split('=');
       if (!key) return '';
-      // Escape backticks and backslashes in values
       const safeVal = val.replace(/[`\\]/g, '\\$&');
       return `${key}: \`${safeVal}\``;
     })
