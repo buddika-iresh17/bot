@@ -14,7 +14,6 @@ const PORT = process.env.PORT || 3000
 
 app.use(fileUpload())
 
-// Serve the upload page
 app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'))
 })
@@ -39,7 +38,6 @@ app.post('/upload', async (req, res) => {
     return res.status(500).send('Failed to save uploaded file')
   }
 
-  // Extract zip
   fs.createReadStream(uploadPath)
     .pipe(unzipper.Extract({ path: extractDir }))
     .on('close', () => {
@@ -49,33 +47,39 @@ app.post('/upload', async (req, res) => {
         return res.status(400).send('No index.js found in extracted bot folder')
       }
 
-      // Run the bot start script
-      const botProcess = exec(`node ${startScript}`, { cwd: extractDir })
+      // Run npm install automatically before running the bot
+      exec('npm install', { cwd: extractDir }, (err, stdout, stderr) => {
+        if (err) {
+          console.error('npm install error:', err)
+          return res.status(500).send('Failed to run npm install in bot folder')
+        }
+        console.log('npm install output:', stdout)
 
-      // Send logs to server console + emit to all connected clients
-      botProcess.stdout.on('data', data => {
-        process.stdout.write(`[BOT STDOUT]: ${data}`)
-        io.emit('bot-log', data.toString())
+        const botProcess = exec(`node ${startScript}`, { cwd: extractDir })
+
+        botProcess.stdout.on('data', data => {
+          process.stdout.write(`[BOT STDOUT]: ${data}`)
+          io.emit('bot-log', data.toString())
+        })
+
+        botProcess.stderr.on('data', data => {
+          process.stderr.write(`[BOT STDERR]: ${data}`)
+          io.emit('bot-log', data.toString())
+        })
+
+        botProcess.on('close', code => {
+          console.log(`Bot process exited with code ${code}`)
+          io.emit('bot-log', `\n[Bot process exited with code ${code}]\n`)
+        })
+
+        res.send('Bot uploaded, dependencies installed, and started! View logs below.')
       })
-
-      botProcess.stderr.on('data', data => {
-        process.stderr.write(`[BOT STDERR]: ${data}`)
-        io.emit('bot-log', data.toString())
-      })
-
-      botProcess.on('close', code => {
-        console.log(`Bot process exited with code ${code}`)
-        io.emit('bot-log', `\n[Bot process exited with code ${code}]\n`)
-      })
-
-      res.send('Bot uploaded, extracted, and started! Open this page to see logs.')
     })
     .on('error', err => {
       res.status(500).send('Failed to extract zip: ' + err.message)
     })
 })
 
-// Socket.io connection log (optional)
 io.on('connection', socket => {
   console.log('Client connected for bot logs')
   socket.on('disconnect', () => {
