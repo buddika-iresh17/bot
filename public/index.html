@@ -2,48 +2,112 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Upload Bot.zip & View Logs</title>
+  <title>Bot Config.env Setup</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 20px;
-    }
-    #logs {
-      background: #000;
-      color: #0f0;
-      padding: 10px;
-      height: 300px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      font-family: monospace;
-      border: 1px solid #0f0;
-      margin-top: 20px;
-    }
+    label { display: block; margin-top: 10px; font-weight: bold; }
+    input, textarea { width: 400px; }
   </style>
 </head>
 <body>
-  <h2>Upload your bot.zip file</h2>
-  <form method="POST" action="/upload" enctype="multipart/form-data" id="uploadForm">
-    <input type="file" name="botzip" accept=".zip" required />
-    <button type="submit">Upload & Run Bot</button>
+  <h1>Configure Bot Settings</h1>
+  <form id="configForm">
+    <label for="SESSION_ID">SESSION_ID</label>
+    <textarea id="SESSION_ID" name="SESSION_ID" rows="5" required></textarea>
+
+    <label for="MODE">MODE</label>
+    <input id="MODE" name="MODE" placeholder="private" />
+
+    <label for="PREFIX">PREFIX</label>
+    <input id="PREFIX" name="PREFIX" placeholder="." />
+
+    <label for="AUTO_REACT">AUTO_REACT</label>
+    <input id="AUTO_REACT" name="AUTO_REACT" placeholder="true or false" />
+
+    <label for="ANTI_DEL_PATH">ANTI_DEL_PATH</label>
+    <input id="ANTI_DEL_PATH" name="ANTI_DEL_PATH" placeholder="inbox" />
+
+    <label for="DEV">DEV</label>
+    <input id="DEV" name="DEV" />
+
+    <label for="READ_MESSAGE">READ_MESSAGE</label>
+    <input id="READ_MESSAGE" name="READ_MESSAGE" placeholder="true or false" />
+
+    <label for="AUTO_READ_STATUS">AUTO_READ_STATUS</label>
+    <input id="AUTO_READ_STATUS" name="AUTO_READ_STATUS" placeholder="true or false" />
+
+    <label for="AUTO_STATUS_REPLY">AUTO_STATUS_REPLY</label>
+    <input id="AUTO_STATUS_REPLY" name="AUTO_STATUS_REPLY" placeholder="true or false" />
+
+    <label for="AUTO_STATUS_REACT">AUTO_STATUS_REACT</label>
+    <input id="AUTO_STATUS_REACT" name="AUTO_STATUS_REACT" placeholder="true or false" />
+
+    <label for="AUTOLIKESTATUS">AUTOLIKESTATUS</label>
+    <input id="AUTOLIKESTATUS" name="AUTOLIKESTATUS" placeholder="true or false" />
+
+    <label for="AUTO_TYPING">AUTO_TYPING</label>
+    <input id="AUTO_TYPING" name="AUTO_TYPING" placeholder="true or false" />
+
+    <label for="AUTO_RECORDING">AUTO_RECORDING</label>
+    <input id="AUTO_RECORDING" name="AUTO_RECORDING" placeholder="true or false" />
+
+    <label for="ALWAYS_ONLINE">ALWAYS_ONLINE</label>
+    <input id="ALWAYS_ONLINE" name="ALWAYS_ONLINE" placeholder="true or false" />
+
+    <label for="ANTI_CALL">ANTI_CALL</label>
+    <input id="ANTI_CALL" name="ANTI_CALL" placeholder="true or false" />
+
+    <label for="BAD_NUMBER_BLOCKER">BAD_NUMBER_BLOCKER</label>
+    <input id="BAD_NUMBER_BLOCKER" name="BAD_NUMBER_BLOCKER" placeholder="true or false" />
+
+    <label for="UNIFIED_PROTECTION">UNIFIED_PROTECTION</label>
+    <input id="UNIFIED_PROTECTION" name="UNIFIED_PROTECTION" placeholder="off, warn, kick, strict" />
+
+    <br /><br />
+    <button type="submit">Save Config & Start Bot</button>
   </form>
 
-  <h3>Bot Console Output</h3>
-  <div id="logs"></div>
+  <p id="response"></p>
 
-  <script src="/socket.io/socket.io.js"></script>
   <script>
-    const logsDiv = document.getElementById('logs')
-    const socket = io()
+    async function loadConfig() {
+      try {
+        const res = await fetch('/config.env');
+        if (!res.ok) return;
+        const text = await res.text();
+        const lines = text.split('\n');
+        const form = document.getElementById('configForm');
+        lines.forEach(line => {
+          if (!line) return;
+          const [key, ...vals] = line.split('=');
+          if (form.elements[key]) {
+            form.elements[key].value = vals.join('=').trim();
+          }
+        });
+      } catch {}
+    }
 
-    socket.on('bot-log', data => {
-      logsDiv.textContent += data
-      logsDiv.scrollTop = logsDiv.scrollHeight
-    })
+    const form = document.getElementById('configForm');
+    const response = document.getElementById('response');
 
-    document.getElementById('uploadForm').addEventListener('submit', () => {
-      logsDiv.textContent = ''
-    })
+    form.addEventListener('submit', async e => {
+      e.preventDefault();
+      const data = new URLSearchParams(new FormData(form));
+
+      response.textContent = 'Saving config and starting bot...';
+
+      try {
+        const res = await fetch('/save-config', {
+          method: 'POST',
+          body: data,
+        });
+        const text = await res.text();
+        response.textContent = text;
+      } catch {
+        response.textContent = 'Failed to save config.';
+      }
+    });
+
+    loadConfig();
   </script>
 </body>
 </html>
