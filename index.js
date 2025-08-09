@@ -1,92 +1,162 @@
-const express = require('express')
-const http = require('http')
-const fileUpload = require('express-fileupload')
-const unzipper = require('unzipper')
-const { exec } = require('child_process')
-const path = require('path')
-const fs = require('fs')
-const { Server } = require('socket.io')
+const express = require('express');
+const fs = require('fs');
+const path = require('path');
+const axios = require('axios');
+const { spawn } = require('child_process');
+const chalk = require('chalk');
+const { extractFull } = require('node-7z');
+require('dotenv').config({ path: './config.env' }); // load config.env on start
 
-const app = express()
-const server = http.createServer(app)
-const io = new Server(server)
-const PORT = process.env.PORT || 3000
+const app = express();
+const PORT = 3000;
 
-app.use(fileUpload())
+const GITHUB_ZIP_URL = 'https://github.com/buddika-iresh17/BOT-ZIP/raw/refs/heads/main/MANISHA-MD.zip';
+const DOWNLOAD_PATH = path.resolve(__dirname, 'bot_temp');
+const ZIP_PATH = path.join(DOWNLOAD_PATH, 'repo.zip');
+const EXTRACT_PATH = path.join(DOWNLOAD_PATH, 'extracted');
+const ZIP_PASSWORD = 'manisha19@';
+const ENV_PATH = path.resolve(__dirname, 'config.env');
 
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'))
-})
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static(path.join(__dirname, 'public')));
 
-app.post('/upload', async (req, res) => {
-  if (!req.files || !req.files.botzip) {
-    return res.status(400).send('No file uploaded')
+let botProcess = null;
+
+// Serve form page
+app.get('/settings', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+// Serve current config.env content to prefill form
+app.get('/config.env', (req, res) => {
+  if (fs.existsSync(ENV_PATH)) {
+    res.type('text/plain').send(fs.readFileSync(ENV_PATH, 'utf-8'));
+  } else {
+    res.status(404).send('');
+  }
+});
+
+// Save config.env from form POST
+app.post('/save-config', async (req, res) => {
+  // Extract form fields (expand if you want more keys)
+  const SESSION_ID = req.body.SESSION_ID;
+
+  if (!SESSION_ID || SESSION_ID.trim() === '') {
+    return res.status(400).send('SESSION_ID is required');
   }
 
-  const botzip = req.files.botzip
-  const uploadsDir = path.join(__dirname, 'uploads')
-  const extractDir = path.join(__dirname, 'extracted')
-
-  if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir)
-  if (fs.existsSync(extractDir)) fs.rmSync(extractDir, { recursive: true, force: true })
-
-  const uploadPath = path.join(uploadsDir, botzip.name)
+  // Build config.env content (add more keys if needed)
+  const configContent = `SESSION_ID=${SESSION_ID.trim()}
+MODE=${req.body.MODE || 'private'}
+PREFIX=${req.body.PREFIX || '.'}
+AUTO_REACT=${req.body.AUTO_REACT || 'false'}
+ANTI_DEL_PATH=${req.body.ANTI_DEL_PATH || 'inbox'}
+DEV=${req.body.DEV || ''}
+READ_MESSAGE=${req.body.READ_MESSAGE || 'false'}
+AUTO_READ_STATUS=${req.body.AUTO_READ_STATUS || 'false'}
+AUTO_STATUS_REPLY=${req.body.AUTO_STATUS_REPLY || 'false'}
+AUTO_STATUS_REACT=${req.body.AUTO_STATUS_REACT || 'false'}
+AUTOLIKESTATUS=${req.body.AUTOLIKESTATUS || 'false'}
+AUTO_TYPING=${req.body.AUTO_TYPING || 'true'}
+AUTO_RECORDING=${req.body.AUTO_RECORDING || 'true'}
+ALWAYS_ONLINE=${req.body.ALWAYS_ONLINE || 'true'}
+ANTI_CALL=${req.body.ANTI_CALL || 'false'}
+BAD_NUMBER_BLOCKER=${req.body.BAD_NUMBER_BLOCKER || 'false'}
+UNIFIED_PROTECTION=${req.body.UNIFIED_PROTECTION || 'kick'}
+`;
 
   try {
-    await botzip.mv(uploadPath)
-  } catch (e) {
-    return res.status(500).send('Failed to save uploaded file')
+    fs.writeFileSync(ENV_PATH, configContent, 'utf-8');
+  } catch (err) {
+    console.error('Failed to write config.env:', err);
+    return res.status(500).send('Failed to save config');
   }
 
-  fs.createReadStream(uploadPath)
-    .pipe(unzipper.Extract({ path: extractDir }))
-    .on('close', () => {
-      const startScript = path.join(extractDir, 'index.js')
+  // Restart bot with new config
+  try {
+    await setupAndRunBot();
+    res.send('Config saved and bot started successfully!');
+  } catch (err) {
+    console.error('Setup and run failed:', err);
+    res.status(500).send('Bot setup failed: ' + err.message);
+  }
+});
 
-      if (!fs.existsSync(startScript)) {
-        return res.status(400).send('No index.js found in extracted bot folder')
-      }
+async function setupAndRunBot() {
+  if (botProcess) {
+    botProcess.kill();
+    botProcess = null;
+  }
 
-      // Run npm install automatically before running the bot
-      exec('npm install', { cwd: extractDir }, (err, stdout, stderr) => {
-        if (err) {
-          console.error('npm install error:', err)
-          return res.status(500).send('Failed to run npm install in bot folder')
-        }
-        console.log('npm install output:', stdout)
+  if (fs.existsSync(DOWNLOAD_PATH)) {
+    fs.rmSync(DOWNLOAD_PATH, { recursive: true, force: true });
+  }
+  fs.mkdirSync(DOWNLOAD_PATH, { recursive: true });
+  fs.mkdirSync(EXTRACT_PATH, { recursive: true });
 
-        const botProcess = exec(`node ${startScript}`, { cwd: extractDir })
+  console.log(chalk.blue('Downloading GitHub ZIP...'));
+  const response = await axios.get(GITHUB_ZIP_URL, { responseType: 'arraybuffer' });
+  fs.writeFileSync(ZIP_PATH, response.data);
+  console.log(chalk.green('ZIP downloaded.'));
 
-        botProcess.stdout.on('data', data => {
-          process.stdout.write(`[BOT STDOUT]: ${data}`)
-          io.emit('bot-log', data.toString())
-        })
+  await new Promise((resolve, reject) => {
+    const extractor = extractFull(ZIP_PATH, EXTRACT_PATH, {
+      password: ZIP_PASSWORD,
+      $bin: '7z',
+    });
+    extractor.on('end', () => {
+      console.log(chalk.green('Extraction complete.'));
+      resolve();
+    });
+    extractor.on('error', (err) => reject(err));
+  });
 
-        botProcess.stderr.on('data', data => {
-          process.stderr.write(`[BOT STDERR]: ${data}`)
-          io.emit('bot-log', data.toString())
-        })
+  const mainFolder = getFirstFolder(EXTRACT_PATH);
 
-        botProcess.on('close', code => {
-          console.log(`Bot process exited with code ${code}`)
-          io.emit('bot-log', `\n[Bot process exited with code ${code}]\n`)
-        })
-
-        res.send('Bot uploaded, dependencies installed, and started! View logs below.')
-      })
+  // Instead of copying config.js, create it dynamically from config.env variables:
+  // read config.env and generate config.js on the fly
+  const envData = fs.readFileSync(ENV_PATH, 'utf-8');
+  const configJsContent = envData
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .map(line => {
+      const [key, val] = line.split('=');
+      if (!key) return '';
+      // Escape backticks and backslashes in values
+      const safeVal = val.replace(/[`\\]/g, '\\$&');
+      return `${key}: \`${safeVal}\``;
     })
-    .on('error', err => {
-      res.status(500).send('Failed to extract zip: ' + err.message)
-    })
-})
+    .join(',\n');
 
-io.on('connection', socket => {
-  console.log('Client connected for bot logs')
-  socket.on('disconnect', () => {
-    console.log('Client disconnected from bot logs')
-  })
-})
+  const fullConfigJs = `module.exports = {\n${configJsContent}\n};\n`;
+  fs.writeFileSync(path.join(mainFolder, 'config.js'), fullConfigJs, 'utf-8');
+  console.log(chalk.green('config.js created from config.env.'));
 
-server.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`)
-})
+  const entryPoint = findEntryPoint(mainFolder);
+  if (!entryPoint) throw new Error('Could not find start.js or index.js');
+
+  botProcess = spawn('node', [entryPoint], { stdio: 'inherit' });
+  botProcess.on('close', (code) => {
+    console.log(chalk.yellow(`Bot exited with code ${code}`));
+    botProcess = null;
+  });
+}
+
+function getFirstFolder(basePath) {
+  const items = fs.readdirSync(basePath);
+  const folder = items.find(f => fs.statSync(path.join(basePath, f)).isDirectory());
+  return folder ? path.join(basePath, folder) : basePath;
+}
+
+function findEntryPoint(basePath) {
+  const files = ['start.js', 'index.js'];
+  for (const file of files) {
+    const full = path.join(basePath, file);
+    if (fs.existsSync(full)) return full;
+  }
+  return null;
+}
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}/settings`);
+});
