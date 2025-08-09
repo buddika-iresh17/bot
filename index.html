@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Upload Bot.zip & View Logs</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 20px;
+    }
+    #logs {
+      background: #000;
+      color: #0f0;
+      padding: 10px;
+      height: 300px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      font-family: monospace;
+      border: 1px solid #0f0;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <h2>Upload your bot.zip file</h2>
+  <form method="POST" action="/upload" enctype="multipart/form-data" id="uploadForm">
+    <input type="file" name="botzip" accept=".zip" required />
+    <button type="submit">Upload & Run Bot</button>
+  </form>
+
+  <h3>Bot Console Output</h3>
+  <div id="logs"></div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const logsDiv = document.getElementById('logs')
+    const socket = io()
+
+    socket.on('bot-log', data => {
+      logsDiv.textContent += data
+      logsDiv.scrollTop = logsDiv.scrollHeight
+    })
+
+    // Optional: clear logs on new upload
+    document.getElementById('uploadForm').addEventListener('submit', () => {
+      logsDiv.textContent = ''
+    })
+  </script>
+</body>
+</html>
