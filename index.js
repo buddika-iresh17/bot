@@ -22,12 +22,29 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 let botProcess = null;
 
-// Serve the HTML form at /settings
+// Helper: find system 7z executable path
+function find7zBinary() {
+  const possiblePaths = [
+    '/usr/bin/7z',           // common Linux
+    '/usr/local/bin/7z',     // macOS Homebrew
+    'C:\\Program Files\\7-Zip\\7z.exe',  // Windows default install path
+    'C:\\Program Files (x86)\\7-Zip\\7z.exe'
+  ];
+
+  for (const p of possiblePaths) {
+    if (fs.existsSync(p)) return p;
+  }
+
+  // fallback to just '7z' to use system PATH
+  return '7z';
+}
+
+const SEVEN_ZIP_BIN = find7zBinary();
+
 app.get('/settings', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Serve current config.env content to prefill form fields
 app.get('/config.env', (req, res) => {
   if (fs.existsSync(ENV_PATH)) {
     res.type('text/plain').send(fs.readFileSync(ENV_PATH, 'utf-8'));
@@ -36,7 +53,6 @@ app.get('/config.env', (req, res) => {
   }
 });
 
-// Handle config form submission and bot setup/run
 app.post('/save-config', async (req, res) => {
   const SESSION_ID = req.body.SESSION_ID;
 
@@ -44,23 +60,27 @@ app.post('/save-config', async (req, res) => {
     return res.status(400).send('SESSION_ID is required');
   }
 
-  // Build config.env content string with defaults and submitted values
+  // Normalize checkbox inputs: if checkbox absent = false
+  function toBool(val) {
+    return val === 'true' ? 'true' : 'false';
+  }
+
   const configContent = `SESSION_ID=${SESSION_ID.trim()}
 MODE=${req.body.MODE || 'private'}
 PREFIX=${req.body.PREFIX || '.'}
-AUTO_REACT=${req.body.AUTO_REACT || 'false'}
+AUTO_REACT=${toBool(req.body.AUTO_REACT)}
 ANTI_DEL_PATH=${req.body.ANTI_DEL_PATH || 'inbox'}
 DEV=${req.body.DEV || ''}
-READ_MESSAGE=${req.body.READ_MESSAGE || 'false'}
-AUTO_READ_STATUS=${req.body.AUTO_READ_STATUS || 'false'}
-AUTO_STATUS_REPLY=${req.body.AUTO_STATUS_REPLY || 'false'}
-AUTO_STATUS_REACT=${req.body.AUTO_STATUS_REACT || 'false'}
-AUTOLIKESTATUS=${req.body.AUTOLIKESTATUS || 'false'}
-AUTO_TYPING=${req.body.AUTO_TYPING || 'true'}
-AUTO_RECORDING=${req.body.AUTO_RECORDING || 'true'}
-ALWAYS_ONLINE=${req.body.ALWAYS_ONLINE || 'true'}
-ANTI_CALL=${req.body.ANTI_CALL || 'false'}
-BAD_NUMBER_BLOCKER=${req.body.BAD_NUMBER_BLOCKER || 'false'}
+READ_MESSAGE=${toBool(req.body.READ_MESSAGE)}
+AUTO_READ_STATUS=${toBool(req.body.AUTO_READ_STATUS)}
+AUTO_STATUS_REPLY=${toBool(req.body.AUTO_STATUS_REPLY)}
+AUTO_STATUS_REACT=${toBool(req.body.AUTO_STATUS_REACT)}
+AUTOLIKESTATUS=${toBool(req.body.AUTOLIKESTATUS)}
+AUTO_TYPING=${toBool(req.body.AUTO_TYPING !== undefined ? req.body.AUTO_TYPING : 'true')}
+AUTO_RECORDING=${toBool(req.body.AUTO_RECORDING !== undefined ? req.body.AUTO_RECORDING : 'true')}
+ALWAYS_ONLINE=${toBool(req.body.ALWAYS_ONLINE !== undefined ? req.body.ALWAYS_ONLINE : 'true')}
+ANTI_CALL=${toBool(req.body.ANTI_CALL)}
+BAD_NUMBER_BLOCKER=${toBool(req.body.BAD_NUMBER_BLOCKER)}
 UNIFIED_PROTECTION=${req.body.UNIFIED_PROTECTION || 'kick'}
 `;
 
@@ -97,10 +117,7 @@ async function setupAndRunBot() {
   fs.writeFileSync(ZIP_PATH, response.data);
   console.log(chalk.green('ZIP downloaded.'));
 
-  // Detect 7z binary path depending on OS
-  const SEVEN_ZIP_BIN = process.platform === 'win32'
-    ? 'C:\\Program Files\\7-Zip\\7z.exe'  // Update if your path is different on Windows
-    : '/usr/bin/7z';                      // Common path on Linux/Mac
+  console.log(chalk.blue(`Extracting ZIP using 7z binary at: ${SEVEN_ZIP_BIN}`));
 
   await new Promise((resolve, reject) => {
     const extractor = extractFull(ZIP_PATH, EXTRACT_PATH, {
@@ -111,12 +128,15 @@ async function setupAndRunBot() {
       console.log(chalk.green('Extraction complete.'));
       resolve();
     });
-    extractor.on('error', (err) => reject(err));
+    extractor.on('error', (err) => {
+      console.error('Extraction error:', err);
+      reject(err);
+    });
   });
 
   const mainFolder = getFirstFolder(EXTRACT_PATH);
 
-  // Generate config.js dynamically from config.env file content
+  // Generate config.js dynamically from config.env
   const envData = fs.readFileSync(ENV_PATH, 'utf-8');
   const configJsContent = envData
     .split(/\r?\n/)
