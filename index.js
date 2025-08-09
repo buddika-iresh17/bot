@@ -99,10 +99,7 @@ async function setupAndRunBot() {
   await new Promise((resolve, reject) => {
     const extractor = extractFull(ZIP_PATH, EXTRACT_PATH, {
       password: ZIP_PASSWORD,
-      // <-- මෙතන ඔබගේ OS අනුව 7z full path එක දාන්න
-      // උදා: Linux/macOS: '/usr/bin/7z'
-      // Windows: 'C:\\Program Files\\7-Zip\\7z.exe'
-      $bin: '/usr/bin/7z',
+     $bin: '7z',
     });
     extractor.on('end', () => {
       console.log(chalk.green('Extraction complete.'));
