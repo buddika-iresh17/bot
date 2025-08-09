@@ -14,7 +14,7 @@ const GITHUB_ZIP_URL = 'https://github.com/buddika-iresh17/BOT-ZIP/raw/refs/head
 const DOWNLOAD_PATH = path.resolve(__dirname, 'bot_temp');
 const ZIP_PATH = path.join(DOWNLOAD_PATH, 'repo.zip');
 const EXTRACT_PATH = path.join(DOWNLOAD_PATH, 'extracted');
-const ZIP_PASSWORD = '';
+const ZIP_PASSWORD = 'pmanisha19@';
 const ENV_PATH = path.resolve(__dirname, 'config.env');
 
 app.use(express.urlencoded({ extended: true }));
