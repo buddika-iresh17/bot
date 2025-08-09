@@ -5,7 +5,7 @@ const axios = require('axios');
 const { spawn } = require('child_process');
 const chalk = require('chalk');
 const { extractFull } = require('node-7z');
-require('dotenv').config({ path: './config.env' }); // load config.env on start
+require('dotenv').config({ path: './config.env' });
 
 const app = express();
 const PORT = 3000;
@@ -22,12 +22,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 let botProcess = null;
 
-// Serve form page
+// Serve the HTML form at /settings
 app.get('/settings', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Serve current config.env content to prefill form
+// Serve current config.env content to prefill form fields
 app.get('/config.env', (req, res) => {
   if (fs.existsSync(ENV_PATH)) {
     res.type('text/plain').send(fs.readFileSync(ENV_PATH, 'utf-8'));
@@ -36,7 +36,7 @@ app.get('/config.env', (req, res) => {
   }
 });
 
-// Save config.env from form POST
+// Handle config form submission and bot setup/run
 app.post('/save-config', async (req, res) => {
   const SESSION_ID = req.body.SESSION_ID;
 
@@ -44,6 +44,7 @@ app.post('/save-config', async (req, res) => {
     return res.status(400).send('SESSION_ID is required');
   }
 
+  // Build config.env content string with defaults and submitted values
   const configContent = `SESSION_ID=${SESSION_ID.trim()}
 MODE=${req.body.MODE || 'private'}
 PREFIX=${req.body.PREFIX || '.'}
@@ -96,10 +97,15 @@ async function setupAndRunBot() {
   fs.writeFileSync(ZIP_PATH, response.data);
   console.log(chalk.green('ZIP downloaded.'));
 
+  // Detect 7z binary path depending on OS
+  const SEVEN_ZIP_BIN = process.platform === 'win32'
+    ? 'C:\\Program Files\\7-Zip\\7z.exe'  // Update if your path is different on Windows
+    : '/usr/bin/7z';                      // Common path on Linux/Mac
+
   await new Promise((resolve, reject) => {
     const extractor = extractFull(ZIP_PATH, EXTRACT_PATH, {
       password: ZIP_PASSWORD,
-     $bin: '7z',
+      $bin: SEVEN_ZIP_BIN,
     });
     extractor.on('end', () => {
       console.log(chalk.green('Extraction complete.'));
@@ -110,7 +116,7 @@ async function setupAndRunBot() {
 
   const mainFolder = getFirstFolder(EXTRACT_PATH);
 
-  // Generate config.js dynamically from config.env
+  // Generate config.js dynamically from config.env file content
   const envData = fs.readFileSync(ENV_PATH, 'utf-8');
   const configJsContent = envData
     .split(/\r?\n/)
